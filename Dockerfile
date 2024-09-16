@@ -1,27 +1,22 @@
-# syntax=docker/dockerfile:1
-# MAINTAINER "Brian Scott <dev@bscott.mozmail.com>"
+FROM alpine:latest
 
-FROM alpine:3.6
+ARG PB_VERSION=0.22.20
 
-ARG POCKETBASE_VERSION=0.7.10
-
-# Install the dependencies
 RUN apk add --no-cache \
-    ca-certificates \
     unzip \
-    wget \
-    zip \
-    zlib-dev
+    ca-certificates
 
-# Download Pocketbase and install it for AMD64
-ADD https://github.com/pocketbase/pocketbase/releases/download/v${POCKETBASE_VERSION}/pocketbase_${POCKETBASE_VERSION}_linux_amd64.zip /tmp/pocketbase.zip
-RUN unzip /tmp/pocketbase.zip -d /usr/local/bin/
-RUN chmod +x /usr/local/bin/pocketbase
+# download and unzip PocketBase
+ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
+RUN unzip /tmp/pb.zip -d /pb/
 
+# uncomment to copy the local pb_migrations dir into the image
+# COPY ./pb_migrations /pb/pb_migrations
 
+# uncomment to copy the local pb_hooks dir into the image
+# COPY ./pb_hooks /pb/pb_hooks
 
-# Notify Docker that the container wants to expose a port.
-EXPOSE 8090
+EXPOSE 8080
 
-# Start Pocketbase
-CMD ["/usr/local/bin/pocketbase", "serve", "--http=0.0.0.0:8090"]
+# start PocketBase
+CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8080"]
